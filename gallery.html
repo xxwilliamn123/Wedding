@@ -109,6 +109,96 @@
 
 		<!-- end:header-top -->
 
+		<!-- Guest Photo Upload Section -->
+		<div id="fh5co-guest-upload" class="fh5co-section-gray" style="margin-top: 50px;">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-8 col-md-offset-2 text-center heading-section animate-box">
+						<br>
+						<br>
+						<br>
+						<br>
+						<h2>Share Your Wedding Memories</h2>
+						<p>Upload your best photos from our special day! We'd love to see your perspective of our wedding celebration.</p>
+					</div>
+				</div>
+				<div class="row animate-box">
+					<div class="col-md-10 col-md-offset-1">
+						<div class="upload-container" style="background: #fff; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+							<form id="guest-photo-upload-form" enctype="multipart/form-data">
+								<div class="row">
+									<div class="col-md-6">
+										<div class="form-group">
+											<label for="guest-name">Your Name *</label>
+											<input type="text" class="form-control" id="guest-name" name="guest_name" required>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<div class="form-group">
+											<label for="guest-email">Your Email *</label>
+											<input type="email" class="form-control" id="guest-email" name="guest_email" required>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12">
+										<div class="form-group">
+											<label for="photo-description">Photo Description (Optional)</label>
+											<textarea class="form-control" id="photo-description" name="photo_description" rows="3" placeholder="Tell us about this moment..."></textarea>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12">
+										<div class="form-group">
+											<label for="photo-upload">Select Photos (Max 10, JPG/PNG only) *</label>
+											<input type="file" class="form-control" id="photo-upload" name="photos[]" multiple accept="image/*" required>
+											<small class="text-muted">Maximum file size: 5MB per photo. Photos will be reviewed before appearing in the gallery.</small>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12">
+										<div id="upload-preview" class="text-center" style="margin: 20px 0; display: none;">
+											<h4>Preview of Selected Photos:</h4>
+											<div id="preview-container" class="row"></div>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12 text-center">
+										<button type="submit" class="btn btn-primary btn-lg" style="background: #1e40af; border: none; padding: 12px 30px; font-size: 16px;">
+											<i class="icon-upload" style="margin-right: 8px;"></i>Upload Photos
+										</button>
+									</div>
+								</div>
+								<div id="upload-loader" style="display:none; text-align:center; margin-top:20px;">
+									<i class="icon-spinner" style="font-size:32px; color:#1e40af;"></i>
+									<p style="color:#888;">Uploading photo...</p>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+				
+				<!-- Upload Guidelines -->
+				<div class="row animate-box" style="margin-top: 40px;">
+					<div class="col-md-8 col-md-offset-2">
+						<div class="guidelines" style="background: #f8f9fa; padding: 30px; border-radius: 10px; border-left: 4px solid #1e40af;">
+							<h4 style="color: #1e40af; margin-bottom: 20px;">Upload Guidelines</h4>
+							<ul style="color: #6b7280; line-height: 1.8;">
+								<li>Maximum 10 photos per submission</li>
+								<li>File formats: JPG, PNG only</li>
+								<li>Photos will be reviewed for appropriateness</li>
+								<li>Approved photos will appear in the gallery within 24-48 hours</li>
+								<li>Please ensure you have permission to share any photos featuring other guests</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<div id="fh5co-gallery">
 			<div class="container">
 				<div class="row">
@@ -169,18 +259,18 @@
 	  fetchData.append('folderId', '1TbeQiFUrkyv7Y-bfwFspPdTkRNY-INXV');
 
 	  try {
-		const response = await fetch(FETCH_SCRIPT_URL, {
-		  method: 'POST',
-		  headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-		  },
-		  body: fetchData.toString()
-		});
+	  const response = await fetch(FETCH_SCRIPT_URL, {
+		method: 'POST',
+		headers: {
+		  'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: fetchData.toString()
+	  });
 
-		const result = await response.json();
+	  const result = await response.json();
 		
 		if (result.success) {
-		  // Only return approved files
+	  // Only return approved files
 		  const approvedFiles = result.files.filter(file => file.name.startsWith('APPROVED_'));
 		  return approvedFiles;
 		} else {
@@ -208,8 +298,14 @@
 				<i class="icon-image" style="font-size: 64px; color: #ccc; margin-bottom: 20px; display: block;"></i>
 				<h3 style="color: #6b7280; margin-bottom: 15px;">No Images Uploaded Yet</h3>
 				<p style="color: #9ca3af; font-size: 16px; line-height: 1.6;">
-				  Wedding photos will appear here once they are uploaded and approved.
+				  Be the first to share your wedding memories!<br>
+				  Upload your photos using the form above.
 				</p>
+				<div style="margin-top: 30px;">
+				  <a href="#fh5co-guest-upload" class="btn btn-primary" style="background: #1e40af; border: none; padding: 12px 25px; font-size: 14px;">
+					<i class="icon-upload" style="margin-right: 8px;"></i>Upload Photos
+				  </a>
+				</div>
 			  </div>
 			</div>
 		  `;
