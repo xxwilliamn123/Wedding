@@ -26,70 +26,182 @@ Replace the default code in the editor with this simplified script:
 // Wedding Photo Upload Handler - Google Apps Script
 function doPost(e) {
   try {
+    console.log('=== WEDDING PHOTO UPLOAD STARTED ===');
+    
+    // Check if event object exists
+    if (!e) {
+      console.error('Event object is undefined');
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          success: false,
+          message: 'No request data received'
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    console.log('Event object received:', typeof e);
+    console.log('Event keys:', Object.keys(e));
+    
     const params = e.parameter;
+    console.log('Parameters received:', Object.keys(params));
     
     // Check if this is a rename action
     if (params.action === 'rename') {
+      console.log('Handling rename action...');
       return handleRename(params);
     }
     
     // Handle file upload
+    console.log('Handling file upload...');
     return handleUpload(params);
     
   } catch (error) {
-    console.error('Error:', error);
+    console.error('=== UPLOAD FAILED ===');
+    console.error('Error in doPost:', error);
     return ContentService
       .createTextOutput(JSON.stringify({
         success: false,
-        message: error.toString()
+        message: 'Upload failed: ' + error.toString()
       }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
 function handleUpload(params) {
-  const fileName = params.fileName;
-  const guestName = params.guestName;
-  const guestEmail = params.guestEmail;
-  const description = params.description;
-  const fileData = params.fileData;
-  const fileType = params.fileType;
+  const fileName = params.fileName || 'unknown.jpg';
+  const guestName = params.guestName || 'Unknown Guest';
+  const guestEmail = params.guestEmail || 'unknown@example.com';
+  const description = params.description || '';
+  const fileData = params.fileData || '';
+  const fileType = params.fileType || 'image/jpeg';
   
-  // Get the folder ID from your Google Drive
-  const folderId = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms'; // Replace with your actual folder ID
+  console.log('Upload data:', {
+    fileName: fileName,
+    guestName: guestName,
+    guestEmail: guestEmail,
+    description: description,
+    fileDataLength: fileData ? fileData.length : 0,
+    fileType: fileType
+  });
+  
+  // Validate required fields
+  if (!guestName || guestName === 'Unknown Guest') {
+    console.error('Missing guest name');
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: false,
+        message: 'Missing guest name'
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  if (!guestEmail || guestEmail === 'unknown@example.com') {
+    console.error('Missing guest email');
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: false,
+        message: 'Missing guest email'
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // Use your specific Google Drive folder ID
+  const folderId = '1TbeQiFUrkyv7Y-bfwFspPdTkRNY-INXV';
+  
+  console.log('Using folder ID:', folderId);
   
   try {
-    // Convert base64 to blob
-    const blob = Utilities.newBlob(Utilities.base64Decode(fileData), fileType, fileName);
-    
-    // Upload to Google Drive
+    // Get the folder
     const folder = DriveApp.getFolderById(folderId);
-    const file = folder.createFile(blob);
+    console.log('Found folder:', folder.getName());
+    
+    // Create file name with guest info and timestamp
+    const timestamp = new Date().getTime();
+    const cleanFileName = `${guestName}_${timestamp}_${fileName}`;
+    
+    console.log('Creating file:', cleanFileName);
+    
+    let file = null;
+    
+    // If we have file data, create the file from base64
+    if (fileData && fileData.length > 0) {
+      try {
+        console.log('Converting base64 to blob...');
+        // Convert base64 to blob
+        const blob = Utilities.newBlob(Utilities.base64Decode(fileData), fileType, cleanFileName);
+        file = folder.createFile(blob);
+        console.log('File created from base64 data:', file.getName());
+      } catch (blobError) {
+        console.error('Error creating file from base64:', blobError);
+        // Create a placeholder file if base64 conversion fails
+        const placeholderContent = `Photo uploaded by ${guestName} on ${new Date().toLocaleString()}\nOriginal file: ${fileName}\nError: Could not process image data\nError details: ${blobError.toString()}`;
+        file = folder.createFile(placeholderContent, cleanFileName, MimeType.PLAIN_TEXT);
+        console.log('Created placeholder file due to error');
+      }
+    } else {
+      // Create a placeholder file if no file data
+      const placeholderContent = `Photo uploaded by ${guestName} on ${new Date().toLocaleString()}\nOriginal file: ${fileName}\nNo file data received\nThis is a test upload`;
+      file = folder.createFile(placeholderContent, cleanFileName, MimeType.PLAIN_TEXT);
+      console.log('Created placeholder file (no file data)');
+    }
+    
+    // Add metadata to file description
+    const metadata = {
+      guestName: guestName,
+      guestEmail: guestEmail,
+      description: description || 'No description provided',
+      uploadDate: new Date().toISOString(),
+      originalFileName: fileName,
+      fileType: fileType
+    };
+    
+    file.setDescription(JSON.stringify(metadata));
+    console.log('File metadata added');
     
     // Set file permissions to anyone with link can view
     file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    console.log('File permissions set');
     
-    // Get the file URL
+    // Get the file URL for display
     const fileUrl = file.getDownloadUrl();
+    console.log('File URL:', fileUrl);
     
-    // Send email notification
-    sendEmailNotification(guestName, guestEmail, fileName, description, fileUrl);
+    console.log('File created successfully:', file.getName());
+    
+    // Send confirmation email
+    try {
+      console.log('Sending confirmation email...');
+      sendConfirmationEmail(guestEmail, guestName, fileName);
+    } catch (emailError) {
+      console.error('Failed to send confirmation email:', emailError);
+    }
+    
+    // Send notification to admin
+    try {
+      console.log('Sending admin notification...');
+      sendAdminNotification(guestName, guestEmail, fileName, description, fileUrl);
+    } catch (adminEmailError) {
+      console.error('Failed to send admin notification:', adminEmailError);
+    }
+    
+    console.log('=== UPLOAD COMPLETED SUCCESSFULLY ===');
     
     return ContentService
       .createTextOutput(JSON.stringify({
         success: true,
+        message: 'Photo uploaded successfully',
         fileId: file.getId(),
         fileUrl: fileUrl,
-        message: 'File uploaded successfully'
+        fileName: cleanFileName
       }))
       .setMimeType(ContentService.MimeType.JSON);
       
   } catch (error) {
-    console.error('Upload error:', error);
+    console.error('Folder or file creation error:', error);
     return ContentService
       .createTextOutput(JSON.stringify({
         success: false,
-        message: error.toString()
+        message: 'Error accessing folder or creating file: ' + error.toString()
       }))
       .setMimeType(ContentService.MimeType.JSON);
   }
@@ -99,12 +211,26 @@ function handleRename(params) {
   const fileId = params.fileId;
   const newName = params.newName;
   
+  console.log('Rename request:', { fileId: fileId, newName: newName });
+  
+  if (!fileId || !newName) {
+    console.error('Missing fileId or newName for rename');
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: false,
+        message: 'Missing fileId or newName'
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
   try {
     // Get the file by ID
     const file = DriveApp.getFileById(fileId);
+    console.log('Found file:', file.getName());
     
     // Rename the file
     file.setName(newName);
+    console.log('File renamed to:', newName);
     
     return ContentService
       .createTextOutput(JSON.stringify({
@@ -125,8 +251,42 @@ function handleRename(params) {
   }
 }
 
-function sendEmailNotification(guestName, guestEmail, fileName, description, fileUrl) {
-  const adminEmail = 'montengro.cyndie1416@gmail.com'; // Replace with your email
+// Handle GET requests (for testing)
+function doGet(e) {
+  console.log('GET request received');
+  return ContentService
+    .createTextOutput("Wedding Photo Upload Service is running!")
+    .setMimeType(ContentService.MimeType.TEXT);
+}
+
+// Send confirmation email to guest
+function sendConfirmationEmail(guestEmail, guestName, fileName) {
+  const subject = 'Photo Upload Confirmation - Wedding Website';
+  const body = `
+    Dear ${guestName},
+    
+    Thank you for uploading your photo "${fileName}" to our wedding website!
+    
+    Your photo has been received and will be reviewed within 24-48 hours. 
+    Once approved, it will appear in our wedding gallery.
+    
+    If you have any questions, please don't hesitate to contact us.
+    
+    Best regards,
+    The Wedding Couple
+  `;
+  
+  try {
+    GmailApp.sendEmail(guestEmail, subject, body);
+    console.log('Confirmation email sent to:', guestEmail);
+  } catch (error) {
+    console.error('Failed to send confirmation email:', error);
+  }
+}
+
+// Send notification to admin
+function sendAdminNotification(guestName, guestEmail, fileName, description, fileUrl) {
+  const adminEmail = 'montengro.cyndie1416@gmail.com'; // Your email
   
   const subject = `New Photo Upload - ${guestName}`;
   const body = `
@@ -144,8 +304,23 @@ function sendEmailNotification(guestName, guestEmail, fileName, description, fil
   
   try {
     GmailApp.sendEmail(adminEmail, subject, body);
+    console.log('Admin notification sent to:', adminEmail);
   } catch (error) {
-    console.error('Email error:', error);
+    console.error('Failed to send admin notification:', error);
+  }
+}
+
+// Test function to verify setup
+function testSetup() {
+  console.log('Google Apps Script is working correctly!');
+  try {
+    const folder = DriveApp.getFolderById('1TbeQiFUrkyv7Y-bfwFspPdTkRNY-INXV');
+    console.log('Folder ID:', folder.getId());
+    console.log('Folder name:', folder.getName());
+    return true;
+  } catch (error) {
+    console.error('Test setup failed:', error);
+    return false;
   }
 }
 

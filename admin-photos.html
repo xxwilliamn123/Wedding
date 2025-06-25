@@ -318,10 +318,13 @@
                                     ${file.google_drive_url ? `
                                         <img src="${file.google_drive_url}" alt="${file.original_name}" 
                                              style="width: 100%; height: 150px; object-fit: cover;"
-                                             onerror="this.parentElement.innerHTML='<div style=\\'background: #f8f9fa; height: 150px; display: flex; align-items: center; justify-content: center;\\'><i class=\\'icon-image\\' style=\\'font-size: 48px; color: #ddd;\\'></i></div>'">
+                                             onerror="this.parentElement.innerHTML='<div style=\\'background: #f8f9fa; height: 150px; display: flex; align-items: center; justify-content: center;\\'><div style=\\'text-align: center;\\'><i class=\\'icon-image\\' style=\\'font-size: 48px; color: #ddd;\\'></i><br><small style=\\'color: #999;\\'>Image not available</small></div></div>'">
                                     ` : `
                                         <div style="background: #f8f9fa; height: 150px; display: flex; align-items: center; justify-content: center;">
-                                            <i class="icon-image" style="font-size: 48px; color: #ddd;"></i>
+                                            <div style="text-align: center;">
+                                                <i class="icon-image" style="font-size: 48px; color: #ddd;"></i>
+                                                <br><small style="color: #999;">No preview available</small>
+                                            </div>
                                         </div>
                                     `}
                                     <div class="photo-info">
@@ -329,6 +332,7 @@
                                         <div>${this.formatFileSize(file.file_size)}</div>
                                         <div>${file.file_type}</div>
                                         ${file.google_drive_id ? `<div style="font-size: 10px; color: #999;">ID: ${file.google_drive_id}</div>` : ''}
+                                        ${file.google_drive_url ? `<div style="font-size: 10px; color: #999;"><a href="${file.google_drive_url}" target="_blank">View in Drive</a></div>` : ''}
                                     </div>
                                 </div>
                             `).join('')}
@@ -375,7 +379,7 @@
                 if (!submission) return;
                 
                 // Google Apps Script URL for renaming files
-                const RENAME_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwrBo6u4vhP3JzuhUdK2AD7n0DwleujlTWECQvCYm9hADnNrjcaDbcXisr1ynDxwG3Q/exec';
+                const RENAME_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwINU8aN3UW0-ieqzZB1i41h0O0PSdigNPcvAuxxQx7-gaaZsufRuFZlaWFggn4P3BN/exec';
                 
                 for (const file of submission.files) {
                     if (file.google_drive_id) {

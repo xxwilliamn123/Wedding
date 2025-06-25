@@ -19,7 +19,8 @@
     
     <div class="test-section info">
         <h3>Your Google Apps Script URL</h3>
-        <input type="text" id="script-url" value="https://script.google.com/macros/s/AKfycbwNsw9tA3n1WVPzuf_f1khc7330ZpV4WS3TFbhTTrw/exec" style="width: 100%; padding: 10px; margin: 10px 0;">
+        <input type="text" id="script-url" value="https://script.google.com/macros/s/AKfycbwINU8aN3UW0-ieqzZB1i41h0O0PSdigNPcvAuxxQx7-gaaZsufRuFZlaWFggn4P3BN/exec" style="width: 100%; padding: 10px; margin: 10px 0;">
+        <p><strong>Important:</strong> Make sure this URL ends with <code>/exec</code> (not <code>/dev</code>)</p>
     </div>
     
     <div class="test-section">
@@ -32,6 +33,14 @@
         <h3>Test 2: Simple POST Request</h3>
         <p>This should create a test file in your Google Drive</p>
         <button onclick="testDirectPost()">Test POST</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 3: Rename Functionality</h3>
+        <p>Test the file renaming feature (requires a valid file ID)</p>
+        <input type="text" id="file-id" placeholder="Enter Google Drive File ID" style="width: 300px; padding: 5px; margin: 5px;">
+        <input type="text" id="new-name" placeholder="New file name" style="width: 200px; padding: 5px; margin: 5px;">
+        <button onclick="testRename()">Test Rename</button>
     </div>
     
     <div id="results"></div>
@@ -106,6 +115,57 @@
             } catch (error) {
                 console.error('POST Error:', error);
                 showResult(`POST Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testRename() {
+            const fileId = document.getElementById('file-id').value;
+            const newName = document.getElementById('new-name').value;
+            
+            if (!fileId || !newName) {
+                showResult('Please enter both file ID and new name', 'error');
+                return;
+            }
+            
+            try {
+                showResult('Testing rename functionality...', 'info');
+                console.log('Making rename request to:', getScriptUrl());
+                
+                const renameData = new URLSearchParams();
+                renameData.append('action', 'rename');
+                renameData.append('fileId', fileId);
+                renameData.append('newName', newName);
+                
+                console.log('Rename Data:', renameData.toString());
+                
+                const response = await fetch(getScriptUrl(), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: renameData.toString()
+                });
+                
+                console.log('Rename Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Rename Error response:', errorText);
+                    showResult(`Rename Error: ${response.status} ${response.statusText}`, 'error');
+                    return;
+                }
+                
+                const result = await response.json();
+                console.log('Rename Response JSON:', result);
+                
+                if (result.success) {
+                    showResult(`Rename Success: File renamed to "${newName}"`, 'success');
+                } else {
+                    showResult(`Rename Failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Rename Error:', error);
+                showResult(`Rename Error: ${error.message}`, 'error');
             }
         }
     </script>
