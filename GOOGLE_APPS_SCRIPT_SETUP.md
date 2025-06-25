@@ -126,7 +126,7 @@ function handleRename(params) {
 }
 
 function sendEmailNotification(guestName, guestEmail, fileName, description, fileUrl) {
-  const adminEmail = 'your-email@gmail.com'; // Replace with your email
+  const adminEmail = 'montengro.cyndie1416@gmail.com'; // Replace with your email
   
   const subject = `New Photo Upload - ${guestName}`;
   const body = `
