@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Photo Management - Admin Panel</title>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .photo-preview {
+            max-width: 150px;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .photo-preview:hover {
+            transform: scale(1.05);
+            transition: transform 0.2s ease;
+        }
+        .submission-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status-pending { color: #f39c12; font-weight: bold; }
+        .status-approved { color: #27ae60; font-weight: bold; }
+        .status-rejected { color: #e74c3c; font-weight: bold; }
+        .modal-image {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-top: 100px;
+        }
+        .stats-container {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body style="background: #f8f9fa;">
+    <div id="login-section" style="display: none;">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3">
+                    <div class="login-container">
+                        <h2 class="text-center" style="color: #1e40af; margin-bottom: 30px;">Photo Management Login</h2>
+                        <form id="login-form">
+                            <div class="form-group">
+                                <label for="admin_password">Admin Password</label>
+                                <input type="password" class="form-control" id="admin_password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Login</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-panel" style="display: none;">
+        <div class="container" style="margin-top: 30px;">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1 style="color: #1e40af;">Photo Management</h1>
+                        <button id="logout-btn" class="btn btn-outline-danger">Logout</button>
+                    </div>
+                    
+                    <!-- Statistics -->
+                    <div class="stats-container">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <h3 id="total-submissions">0</h3>
+                                <p>Total Submissions</p>
+                            </div>
+                            <div class="col-md-3">
+                                <h3 id="pending-submissions">0</h3>
+                                <p>Pending Review</p>
+                            </div>
+                            <div class="col-md-3">
+                                <h3 id="approved-submissions">0</h3>
+                                <p>Approved</p>
+                            </div>
+                            <div class="col-md-3">
+                                <h3 id="rejected-submissions">0</h3>
+                                <p>Rejected</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="submissions-container">
+                        <!-- Submissions will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Photo Preview</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="modal-image" class="modal-image" src="" alt="Photo Preview">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    
+    <script>
+        // Admin configuration
+        const ADMIN_PASSWORD = 'wedding2025'; // Change this to a secure password
+        
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!isAuthenticated()) {
+                showLogin();
+            } else {
+                showAdminPanel();
+                loadSubmissions();
+            }
+        });
+        
+        // Authentication functions
+        function isAuthenticated() {
+            return sessionStorage.getItem('admin_authenticated') === 'true';
+        }
+        
+        function authenticate(password) {
+            if (password === ADMIN_PASSWORD) {
+                sessionStorage.setItem('admin_authenticated', 'true');
+                return true;
+            }
+            return false;
+        }
+        
+        function logout() {
+            sessionStorage.removeItem('admin_authenticated');
+            showLogin();
+        }
+        
+        function showLogin() {
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('admin-panel').style.display = 'none';
+        }
+        
+        function showAdminPanel() {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+        }
+        
+        // Login form handler
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = document.getElementById('admin_password').value;
+            
+            if (authenticate(password)) {
+                showAdminPanel();
+                loadSubmissions();
+                document.getElementById('admin_password').value = '';
+            } else {
+                alert('Invalid password');
+            }
+        });
+        
+        // Logout handler
+        document.getElementById('logout-btn').addEventListener('click', logout);
+        
+        // Load submissions from localStorage
+        function loadSubmissions() {
+            const submissions = JSON.parse(localStorage.getItem('photo_submissions') || '[]');
+            
+            // Sort by submission date (newest first)
+            submissions.sort((a, b) => new Date(b.submission_date) - new Date(a.submission_date));
+            
+            updateStatistics(submissions);
+            displaySubmissions(submissions);
+        }
+        
+        // Update statistics
+        function updateStatistics(submissions) {
+            const total = submissions.length;
+            const pending = submissions.filter(s => s.status === 'pending').length;
+            const approved = submissions.filter(s => s.status === 'approved').length;
+            const rejected = submissions.filter(s => s.status === 'rejected').length;
+            
+            document.getElementById('total-submissions').textContent = total;
+            document.getElementById('pending-submissions').textContent = pending;
+            document.getElementById('approved-submissions').textContent = approved;
+            document.getElementById('rejected-submissions').textContent = rejected;
+        }
+        
+        // Display submissions
+        function displaySubmissions(submissions) {
+            const container = document.getElementById('submissions-container');
+            
+            if (submissions.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No photo submissions found.</div>';
+                return;
+            }
+            
+            container.innerHTML = submissions.map(submission => `
+                <div class="submission-card">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h4>${escapeHtml(submission.guest_name)}</h4>
+                            <p><strong>Email:</strong> ${escapeHtml(submission.guest_email)}</p>
+                            <p><strong>Date:</strong> ${new Date(submission.submission_date).toLocaleString()}</p>
+                            <p><strong>Status:</strong> 
+                                <span class="status-${submission.status}">
+                                    ${submission.status.charAt(0).toUpperCase() + submission.status.slice(1)}
+                                </span>
+                            </p>
+                            ${submission.photo_description ? `<p><strong>Description:</strong> ${escapeHtml(submission.photo_description)}</p>` : ''}
+                            <p><strong>Photos:</strong> ${submission.files.length} files</p>
+                        </div>
+                        <div class="col-md-4">
+                            ${submission.status === 'pending' ? `
+                                <button onclick="approveSubmission('${submission.id}')" class="btn btn-success btn-sm">
+                                    Approve
+                                </button>
+                                <button onclick="rejectSubmission('${submission.id}')" class="btn btn-danger btn-sm">
+                                    Reject
+                                </button>
+                            ` : `
+                                <p><strong>Action:</strong> ${submission.status.charAt(0).toUpperCase() + submission.status.slice(1)} on ${submission.approved_date ? new Date(submission.approved_date).toLocaleString() : 'N/A'}</p>
+                            `}
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <h5>Photo Previews:</h5>
+                            ${submission.files.map((file, index) => `
+                                <img src="${file.data}" alt="${escapeHtml(file.original_name)}" 
+                                     class="photo-preview" 
+                                     onclick="showImageModal('${file.data}', '${escapeHtml(file.original_name)}')">
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Approve submission
+        function approveSubmission(submissionId) {
+            if (confirm('Are you sure you want to approve this submission?')) {
+                updateSubmissionStatus(submissionId, 'approved');
+            }
+        }
+        
+        // Reject submission
+        function rejectSubmission(submissionId) {
+            if (confirm('Are you sure you want to reject this submission?')) {
+                updateSubmissionStatus(submissionId, 'rejected');
+            }
+        }
+        
+        // Update submission status
+        function updateSubmissionStatus(submissionId, status) {
+            const submissions = JSON.parse(localStorage.getItem('photo_submissions') || '[]');
+            
+            const submission = submissions.find(s => s.id === submissionId);
+            if (submission) {
+                submission.status = status;
+                submission.approved_by = 'admin';
+                submission.approved_date = new Date().toISOString();
+                
+                localStorage.setItem('photo_submissions', JSON.stringify(submissions));
+                loadSubmissions();
+                
+                alert(`Submission ${status} successfully!`);
+            }
+        }
+        
+        // Show image modal
+        function showImageModal(imageSrc, imageName) {
+            document.getElementById('modal-image').src = imageSrc;
+            document.getElementById('modal-image').alt = imageName;
+            $('#imageModal').modal('show');
+        }
+        
+        // Utility function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html> 

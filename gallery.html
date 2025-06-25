@@ -109,6 +109,93 @@
 
 		<!-- end:header-top -->
 
+		<!-- Guest Photo Upload Section -->
+		<div id="fh5co-guest-upload" class="fh5co-section-gray" style="margin-top: 50px;">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-8 col-md-offset-2 text-center heading-section animate-box">
+						<br>
+						<br>
+						<br>
+						<br>
+						<h2>Share Your Wedding Memories</h2>
+						<p>Upload your best photos from our special day! We'd love to see your perspective of our wedding celebration.</p>
+					</div>
+				</div>
+				<div class="row animate-box">
+					<div class="col-md-10 col-md-offset-1">
+						<div class="upload-container" style="background: #fff; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+							<form id="guest-photo-upload-form" enctype="multipart/form-data">
+								<div class="row">
+									<div class="col-md-6">
+										<div class="form-group">
+											<label for="guest-name">Your Name *</label>
+											<input type="text" class="form-control" id="guest-name" name="guest_name" required>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<div class="form-group">
+											<label for="guest-email">Your Email *</label>
+											<input type="email" class="form-control" id="guest-email" name="guest_email" required>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12">
+										<div class="form-group">
+											<label for="photo-description">Photo Description (Optional)</label>
+											<textarea class="form-control" id="photo-description" name="photo_description" rows="3" placeholder="Tell us about this moment..."></textarea>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12">
+										<div class="form-group">
+											<label for="photo-upload">Select Photos (Max 10, JPG/PNG only) *</label>
+											<input type="file" class="form-control" id="photo-upload" name="photos[]" multiple accept="image/*" required>
+											<small class="text-muted">Maximum file size: 5MB per photo. Photos will be reviewed before appearing in the gallery.</small>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12">
+										<div id="upload-preview" class="text-center" style="margin: 20px 0; display: none;">
+											<h4>Preview of Selected Photos:</h4>
+											<div id="preview-container" class="row"></div>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12 text-center">
+										<button type="submit" class="btn btn-primary btn-lg" style="background: #1e40af; border: none; padding: 12px 30px; font-size: 16px;">
+											<i class="icon-upload" style="margin-right: 8px;"></i>Upload Photos
+										</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+				
+				<!-- Upload Guidelines -->
+				<div class="row animate-box" style="margin-top: 40px;">
+					<div class="col-md-8 col-md-offset-2">
+						<div class="guidelines" style="background: #f8f9fa; padding: 30px; border-radius: 10px; border-left: 4px solid #1e40af;">
+							<h4 style="color: #1e40af; margin-bottom: 20px;">Upload Guidelines</h4>
+							<ul style="color: #6b7280; line-height: 1.8;">
+								<li>Maximum 10 photos per submission</li>
+								<li>File formats: JPG, PNG only</li>
+								<li>Maximum file size: 5MB per photo</li>
+								<li>Photos will be reviewed for appropriateness</li>
+								<li>Approved photos will appear in the gallery within 24-48 hours</li>
+								<li>Please ensure you have permission to share any photos featuring other guests</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<div id="fh5co-gallery">
 			<div class="container">
 				<div class="row">
@@ -147,73 +234,6 @@
 				</div>
 			</div>
 		</div>
-		
-		<div id="fh5co-started" style="background-image:url(images/cover_bg_2.jpg);"data-stellar-background-ratio="0.5">
-		<div class="overlay"></div>
-			<div class="container">
-				<div class="row animate-box">
-					<div class="col-md-8 col-md-offset-2 text-center heading-section">
-						<h2>Are You Attending?</h2>
-						<p>Please Fill-up the form to notify you that you're attending. Thanks.
-					</div>
-				</div>
-				<div class="row animate-box">
-					<div class="col-md-10 col-md-offset-1">
-						<form class="form-inline" id="guest-attendance-form">
-							<div class="col-md-4 col-sm-4">
-								<div class="form-group">
-									<label for="name" class="sr-only">Name</label>
-									<input type="text" class="form-control" id="name" name="name" placeholder="Name" required>
-								</div>
-							</div>
-							<div class="col-md-4 col-sm-4">
-								<div class="form-group">
-									<label for="email" class="sr-only">Email</label>
-									<input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
-								</div>
-							</div>
-							<div class="col-md-4 col-sm-4">
-								<button type="submit" class="btn btn-primary btn-block">I am Attending</button>
-							</div>
-						</form>
-					</div>
-				</div>
-				
-				<!-- Monetary Gifts Section -->
-				<div class="row animate-box" style="margin-top: 50px;">
-					<div class="col-md-8 col-md-offset-2 text-center heading-section">
-						<h2>Monetary Gifts</h2>
-						<p>If you would like to send monetary gifts, you can send them through the following options:</p>
-					</div>
-				</div>
-				<div class="row animate-box">
-					<div class="col-md-6 col-sm-6">
-						<div class="text-center" style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 10px; margin: 10px;">
-							<h3 style="color: #fff; margin-bottom: 20px;">G-Cash</h3>
-							<div style="background: #fff; padding: 20px; border-radius: 8px; display: flex; flex-direction: column; align-items: center;">
-								<img src="images/download (1).jpg" alt="GCash QR Code" style="width: 180px; height: 180px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.07);">
-								<p style="margin: 0; font-weight: bold; color: #333;">Cyndie Montenegro</p>
-								<p style="margin: 5px 0; color: #666;">Mobile No: <span id="gcash-number">09927894992</span>
-									<button onclick="navigator.clipboard.writeText('09927894992')" style="margin-left: 8px; padding: 2px 10px; font-size: 12px; border: none; border-radius: 4px; background: #1e40af; color: #fff; cursor: pointer;">Copy</button>
-								</p>
-								<p style="margin: 0; color: #888; font-size: 13px;">Scan QR code or send to mobile number</p>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-6 col-sm-6">
-						<div class="text-center" style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 10px; margin: 10px;">
-							<h3 style="color: #fff; margin-bottom: 20px;">Bank Transfer</h3>
-							<div style="background: #fff; padding: 20px; border-radius: 8px;">
-								<p style="margin: 0; font-weight: bold; color: #333;">BDO Savings Account</p>
-								<p style="margin: 5px 0; color: #666;">Account Name: William Vidal</p>
-								<p style="margin: 5px 0; color: #666;">Account No: 1234-5678-9012</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
 		<footer>
 			<div id="footer">
 				<div class="container">
