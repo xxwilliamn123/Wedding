@@ -193,7 +193,9 @@ document.addEventListener('DOMContentLoaded', function() {
             status: 'pending'
         };
         
-        saveSubmission(submission);
+        // Note: Admin panel will fetch files directly from Google Drive
+        // No need to save to localStorage anymore
+        console.log('Photo uploaded successfully. Admin panel will fetch from Google Drive.');
     }
     
     // Convert file to base64
@@ -213,13 +215,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Generate unique ID
     function generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    }
-    
-    // Save submission metadata
-    function saveSubmission(submission) {
-        const submissions = JSON.parse(localStorage.getItem('photo_submissions') || '[]');
-        submissions.push(submission);
-        localStorage.setItem('photo_submissions', JSON.stringify(submissions));
     }
     
     // Show success message

@@ -199,6 +199,10 @@
             <button id="refresh-btn" class="btn btn-primary">
                 <i class="icon-refresh"></i> Refresh
             </button>
+            
+            <button id="clear-data-btn" class="btn btn-warning" style="margin-left: 10px;">
+                <i class="icon-refresh"></i> Refresh from Drive
+            </button>
         </div>
         
         <!-- Submissions Container -->
@@ -233,14 +237,11 @@
                 document.getElementById('status-filter').addEventListener('change', () => this.filterSubmissions());
                 document.getElementById('guest-filter').addEventListener('change', () => this.filterSubmissions());
                 document.getElementById('refresh-btn').addEventListener('click', () => this.loadSubmissions());
+                document.getElementById('clear-data-btn').addEventListener('click', () => this.clearAllData());
             }
             
             async loadSubmissions() {
-                // Load from localStorage (existing submissions)
-                const stored = localStorage.getItem('photo_submissions');
-                this.submissions = stored ? JSON.parse(stored) : [];
-                
-                // Also try to fetch files from Google Drive
+                // Only fetch files from Google Drive, no localStorage
                 await this.fetchGoogleDriveFiles();
                 
                 this.updateGuestFilter();
@@ -268,46 +269,47 @@
                     if (response.ok) {
                         const result = await response.json();
                         if (result.success && result.files) {
-                            // Process Google Drive files and add them to submissions if not already present
+                            // Process Google Drive files directly
                             this.processGoogleDriveFiles(result.files);
+                        } else {
+                            // If no files found in Google Drive, clear submissions
+                            console.log('No files found in Google Drive');
+                            this.submissions = [];
                         }
+                    } else {
+                        console.error('Failed to fetch Google Drive files');
+                        this.submissions = [];
                     }
                 } catch (error) {
                     console.error('Error fetching Google Drive files:', error);
+                    this.submissions = [];
                 }
             }
             
             processGoogleDriveFiles(driveFiles) {
-                driveFiles.forEach(driveFile => {
-                    // Check if this file is already in our submissions
-                    const existingSubmission = this.submissions.find(sub => 
-                        sub.files.some(file => file.google_drive_id === driveFile.id)
-                    );
-                    
-                    if (!existingSubmission) {
-                        // Create a new submission for this Google Drive file
-                        const newSubmission = {
-                            id: generateId(),
-                            guest_name: this.extractGuestName(driveFile.name),
-                            guest_email: 'unknown@example.com',
-                            photo_description: driveFile.description || '',
-                            files: [{
-                                original_name: driveFile.name,
-                                file_size: driveFile.size || 0,
-                                file_type: driveFile.mimeType || 'image/jpeg',
-                                google_drive_id: driveFile.id,
-                                google_drive_url: driveFile.webContentLink || driveFile.webViewLink
-                            }],
-                            submission_date: driveFile.createdTime || new Date().toISOString(),
-                            status: this.determineStatus(driveFile.name)
-                        };
-                        
-                        this.submissions.push(newSubmission);
-                    }
-                });
+                // Clear existing submissions and create new ones from Google Drive
+                this.submissions = [];
                 
-                // Save updated submissions to localStorage
-                localStorage.setItem('photo_submissions', JSON.stringify(this.submissions));
+                driveFiles.forEach(driveFile => {
+                    // Create a submission for each Google Drive file
+                    const newSubmission = {
+                        id: generateId(),
+                        guest_name: this.extractGuestName(driveFile.name),
+                        guest_email: 'unknown@example.com',
+                        photo_description: driveFile.description || '',
+                        files: [{
+                            original_name: driveFile.name,
+                            file_size: driveFile.size || 0,
+                            file_type: driveFile.mimeType || 'image/jpeg',
+                            google_drive_id: driveFile.id,
+                            google_drive_url: driveFile.webContentLink || driveFile.webViewLink
+                        }],
+                        submission_date: driveFile.createdTime || new Date().toISOString(),
+                        status: this.determineStatus(driveFile.name)
+                    };
+                    
+                    this.submissions.push(newSubmission);
+                });
             }
             
             extractGuestName(fileName) {
@@ -381,7 +383,7 @@
                         <div class="submission-header">
                             <div class="guest-info">
                                 <div class="guest-name">${submission.guest_name}</div>
-                                <div class="guest-email">${submission}</div>
+                                <div class="guest-email">${submission.guest_email}</div>
                                 <div class="submission-date">
                                     Submitted: ${new Date(submission.submission_date).toLocaleString()}
                                 </div>
@@ -485,7 +487,7 @@
                             if (response.ok) {
                                 const result = await response.json();
                                 if (result.success) {
-                                    // Update the file name in our local storage
+                                    // Update the file name in our submissions array
                                     file.original_name = prefix + file.original_name;
                                     console.log(`File renamed successfully: ${file.original_name}`);
                                 }
@@ -496,10 +498,7 @@
                     }
                 }
                 
-                // Save updated submission back to localStorage
-                localStorage.setItem('photo_submissions', JSON.stringify(this.submissions));
-                
-                // Refresh display
+                // Refresh display to get updated data from Google Drive
                 this.loadSubmissions();
             }
             
@@ -510,10 +509,7 @@
                     submission.approved_by = 'Admin'; // In a real app, this would be the logged-in admin
                     submission.approved_date = new Date().toISOString();
                     
-                    // Save back to localStorage
-                    localStorage.setItem('photo_submissions', JSON.stringify(this.submissions));
-                    
-                    // Refresh display
+                    // Refresh display to get updated data from Google Drive
                     this.loadSubmissions();
                     
                     // Show success message
@@ -555,6 +551,15 @@
                 setTimeout(() => {
                     alertDiv.remove();
                 }, 3000);
+            }
+            
+            clearAllData() {
+                if (confirm('Are you sure you want to refresh the data? This will reload all files from Google Drive.')) {
+                    this.submissions = [];
+                    this.filteredSubmissions = [];
+                    this.loadSubmissions();
+                    this.showMessage('Data refreshed from Google Drive!', 'success');
+                }
             }
         }
         
