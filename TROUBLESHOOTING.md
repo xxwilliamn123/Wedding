@@ -114,7 +114,7 @@ If you're still having issues:
 
 1. **Check Script URL**:
    - Make sure your Google Apps Script URL ends with `/exec` (not `/dev`)
-   - Current URL: `https://script.google.com/macros/s/AKfycbwrBo6u4vhP3JzuhUdK2AD7n0DwleujlTWECQvCYm9hADnNrjcaDbcXisr1ynDxwG3Q/exec`
+   - Current URL: `https://script.google.com/macros/s/AKfycbzqhjk9xjME1X18aiBkVTDdW0NtDzLaR8s5BTrSZa5uWHtdpK5gK5e05w4HqhBFEgYv/exec`
 
 2. **Test Script Directly**:
    - Open `test-google-script.html` in your browser

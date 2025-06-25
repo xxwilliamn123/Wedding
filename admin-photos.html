@@ -252,7 +252,7 @@
             async fetchGoogleDriveFiles() {
                 try {
                     // Google Apps Script URL for fetching files
-                    const FETCH_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBTNYQkrS_CldSPVTjVBLERrqzqYT2BbcL8I38MNmwUyziugTqLDFJKFPilZ7Mq2es/exec';
+                    const FETCH_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5-QuLe3KUDvz0vICpWPsMrFM_1y_UQhU_T8uNjZSEtgyrdhttps://script.google.com/macros/s/AKfycbzqhjk9xjME1X18aiBkVTDdW0NtDzLaR8s5BTrSZa5uWHtdpK5gK5e05w4HqhBFEgYv/exec';
                     
                     const fetchData = new URLSearchParams();
                     fetchData.append('action', 'listFiles');
@@ -402,10 +402,13 @@
                         <div class="photo-grid">
                             ${submission.files.map(file => `
                                 <div class="photo-item">
-                                    ${file.google_drive_url ? `
-                                        <img src="${file.google_drive_url}" alt="${file.original_name}" 
-                                             style="width: 100%; height: 150px; object-fit: cover;"
-                                             onerror="this.parentElement.innerHTML='<div style=\\'background: #f8f9fa; height: 150px; display: flex; align-items: center; justify-content: center;\\'><div style=\\'text-align: center;\\'><i class=\\'icon-image\\' style=\\'font-size: 48px; color: #ddd;\\'></i><br><small style=\\'color: #999;\\'>Image not available</small></div></div>'">
+                                    ${file.google_drive_id ? `
+                                        <div style="position:relative;">
+                                            <img src="https://drive.google.com/uc?id=${file.google_drive_id}&export=view" alt="${file.original_name}"
+                                                 style="width: 100%; height: 150px; object-fit: cover;"
+                                                 onerror="this.onerror=null;this.src='https://drive.google.com/thumbnail?id=${file.google_drive_id}&sz=w400';this.nextElementSibling.style.display='block';">
+                                            <a href="https://drive.google.com/file/d/${file.google_drive_id}/view" target="_blank" style="display:none;color:#007bff;text-decoration:underline;font-size:12px;">View in Google Drive</a>
+                                        </div>
                                     ` : `
                                         <div style="background: #f8f9fa; height: 150px; display: flex; align-items: center; justify-content: center;">
                                             <div style="text-align: center;">
@@ -466,7 +469,7 @@
                 if (!submission) return;
                 
                 // Google Apps Script URL for renaming files
-                const RENAME_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBTNYQkrS_CldSPVTjVBLERrqzqYT2BbcL8I38MNmwUyziugTqLDFJKFPilZ7Mq2es/exec';
+                const RENAME_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqhjk9xjME1X18aiBkVTDdW0NtDzLaR8s5BTrSZa5uWHtdpK5gK5e05w4HqhBFEgYv/exec';
                 
                 for (const file of submission.files) {
                     if (file.google_drive_id) {

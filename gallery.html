@@ -109,93 +109,6 @@
 
 		<!-- end:header-top -->
 
-		<!-- Guest Photo Upload Section -->
-		<div id="fh5co-guest-upload" class="fh5co-section-gray" style="margin-top: 50px;">
-			<div class="container">
-				<div class="row">
-					<div class="col-md-8 col-md-offset-2 text-center heading-section animate-box">
-						<br>
-						<br>
-						<br>
-						<br>
-						<h2>Share Your Wedding Memories</h2>
-						<p>Upload your best photos from our special day! We'd love to see your perspective of our wedding celebration.</p>
-					</div>
-				</div>
-				<div class="row animate-box">
-					<div class="col-md-10 col-md-offset-1">
-						<div class="upload-container" style="background: #fff; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-							<form id="guest-photo-upload-form" enctype="multipart/form-data">
-								<div class="row">
-									<div class="col-md-6">
-										<div class="form-group">
-											<label for="guest-name">Your Name *</label>
-											<input type="text" class="form-control" id="guest-name" name="guest_name" required>
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="form-group">
-											<label for="guest-email">Your Email *</label>
-											<input type="email" class="form-control" id="guest-email" name="guest_email" required>
-										</div>
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-md-12">
-										<div class="form-group">
-											<label for="photo-description">Photo Description (Optional)</label>
-											<textarea class="form-control" id="photo-description" name="photo_description" rows="3" placeholder="Tell us about this moment..."></textarea>
-										</div>
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-md-12">
-										<div class="form-group">
-											<label for="photo-upload">Select Photos (Max 10, JPG/PNG only) *</label>
-											<input type="file" class="form-control" id="photo-upload" name="photos[]" multiple accept="image/*" required>
-											<small class="text-muted">Maximum file size: 5MB per photo. Photos will be reviewed before appearing in the gallery.</small>
-										</div>
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-md-12">
-										<div id="upload-preview" class="text-center" style="margin: 20px 0; display: none;">
-											<h4>Preview of Selected Photos:</h4>
-											<div id="preview-container" class="row"></div>
-										</div>
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-md-12 text-center">
-										<button type="submit" class="btn btn-primary btn-lg" style="background: #1e40af; border: none; padding: 12px 30px; font-size: 16px;">
-											<i class="icon-upload" style="margin-right: 8px;"></i>Upload Photos
-										</button>
-									</div>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-				
-				<!-- Upload Guidelines -->
-				<div class="row animate-box" style="margin-top: 40px;">
-					<div class="col-md-8 col-md-offset-2">
-						<div class="guidelines" style="background: #f8f9fa; padding: 30px; border-radius: 10px; border-left: 4px solid #1e40af;">
-							<h4 style="color: #1e40af; margin-bottom: 20px;">Upload Guidelines</h4>
-							<ul style="color: #6b7280; line-height: 1.8;">
-								<li>Maximum 10 photos per submission</li>
-								<li>File formats: JPG, PNG only</li>
-								<li>Maximum file size: 5MB per photo</li>
-								<li>Photos will be reviewed for appropriateness</li>
-								<li>Approved photos will appear in the gallery within 24-48 hours</li>
-								<li>Please ensure you have permission to share any photos featuring other guests</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
 		<div id="fh5co-gallery">
 			<div class="container">
 				<div class="row">
@@ -203,33 +116,10 @@
 						<h2>Wedding Gallery</h2>
 					</div>
 				</div>
-				<div class="row">
-					<div class="col-md-4">
-						<div class="gallery animate-box">
-							<a class="gallery-img image-popup image-popup" href="images/gallery-1.jpg"><img src="images/gallery-1.jpg" class="img-responsive" alt="Free HTML5 Bootstrap Template by FreeHTML5.co"></a>
-						</div>
-						<div class="gallery animate-box">
-							<a class="gallery-img image-popup" href="images/gallery-7.jpg"><img src="images/gallery-7.jpg" class="img-responsive" alt="Free HTML5 Bootstrap Template by FreeHTML5.co"></a>
-						</div>
-					</div>
-					<div class="col-md-4">
-						<div class="gallery animate-box">
-							<a class="gallery-img image-popup" href="images/gallery-6.jpg"><img src="images/gallery-6.jpg" class="img-responsive" alt="Free HTML5 Bootstrap Template by FreeHTML5.co"></a>
-						</div>
-						<div class="gallery animate-box">
-							<a class="gallery-img image-popup" href="images/gallery-2.jpg"><img src="images/gallery-2.jpg" class="img-responsive" alt="Free HTML5 Bootstrap Template by FreeHTML5.co"></a>
-						</div>
-						<div class="gallery animate-box">
-							<a class="gallery-img image-popup" href="images/gallery-5.jpg"><img src="images/gallery-5.jpg" class="img-responsive" alt="Free HTML5 Bootstrap Template by FreeHTML5.co"></a>
-						</div>
-					</div>
-					<div class="col-md-4">
-						<div class="gallery animate-box">
-							<a class="gallery-img image-popup" href="images/gallery-3.jpg"><img src="images/gallery-3.jpg" class="img-responsive" alt="Free HTML5 Bootstrap Template by FreeHTML5.co"></a>
-						</div>
-						<div class="gallery animate-box">
-							<a class="gallery-img image-popup" href="images/gallery-4.jpg"><img src="images/gallery-4.jpg" class="img-responsive" alt="Free HTML5 Bootstrap Template by FreeHTML5.co"></a>
-						</div>
+				<div class="row" id="gallery-container">
+					<div id="gallery-loader" style="width:100%;text-align:center;padding:40px 0;">
+						<i class="icon-spinner" style="font-size:48px;color:#bbb;animation:spin 1s linear infinite;"></i>
+						<p style="color:#888;">Loading gallery...</p>
 					</div>
 				</div>
 			</div>
@@ -271,6 +161,124 @@
 	<script src="js/guest-form.js"></script>
 	<!-- Photo Upload Handler -->
 	<script src="js/photo-upload.js"></script>
+	<script>
+	async function fetchApprovedFiles() {
+	  const FETCH_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqhjk9xjME1X18aiBkVTDdW0NtDzLaR8s5BTrSZa5uWHtdpK5gK5e05w4HqhBFEgYv/exec';
+	  const fetchData = new URLSearchParams();
+	  fetchData.append('action', 'listFiles');
+	  fetchData.append('folderId', '1TbeQiFUrkyv7Y-bfwFspPdTkRNY-INXV');
+
+	  try {
+		const response = await fetch(FETCH_SCRIPT_URL, {
+		  method: 'POST',
+		  headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		  },
+		  body: fetchData.toString()
+		});
+
+		const result = await response.json();
+		
+		if (result.success) {
+		  // Only return approved files
+		  const approvedFiles = result.files.filter(file => file.name.startsWith('APPROVED_'));
+		  return approvedFiles;
+		} else {
+		  console.error('Failed to fetch files:', result.message);
+		  return [];
+		}
+	  } catch (error) {
+		console.error('Error fetching files:', error);
+		return [];
+	  }
+	}
+
+	function renderGallery(files) {
+	  const loader = document.getElementById('gallery-loader');
+	  if (loader) loader.style.display = 'none';
+	  
+	  const galleryRow = document.querySelector('#fh5co-gallery .container .row:last-of-type');
+	  
+	  if (!files || files.length === 0) {
+		// Show "no images" message
+		if (galleryRow) {
+		  galleryRow.innerHTML = `
+			<div class="col-md-12 text-center">
+			  <div class="no-images-message" style="padding: 60px 20px; background: #f8f9fa; border-radius: 15px; margin: 20px 0;">
+				<i class="icon-image" style="font-size: 64px; color: #ccc; margin-bottom: 20px; display: block;"></i>
+				<h3 style="color: #6b7280; margin-bottom: 15px;">No Images Uploaded Yet</h3>
+				<p style="color: #9ca3af; font-size: 16px; line-height: 1.6;">
+				  Wedding photos will appear here once they are uploaded and approved.
+				</p>
+			  </div>
+			</div>
+		  `;
+		}
+		return;
+	  }
+	  
+	  // Render gallery with images
+	  const columns = [[], [], []];
+	  files.forEach((file, idx) => {
+		const fullUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`;
+		const thumbUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w400`;
+		const imgHtml = `
+		  <div class="gallery animate-box fadeInUp animated">
+			<a class="gallery-img image-popup" href="${fullUrl}">
+			  <img src="${thumbUrl}" class="img-responsive" alt="${file.name}">
+			</a>
+		  </div>
+		`;
+		columns[idx % 3].push(imgHtml);
+	  });
+	  
+	  if (galleryRow) {
+		galleryRow.innerHTML = `
+		  <div class="col-md-4">${columns[0].join('')}</div>
+		  <div class="col-md-4">${columns[1].join('')}</div>
+		  <div class="col-md-4">${columns[2].join('')}</div>
+		`;
+		// Re-initialize Magnific Popup for new images
+		if (window.$ && typeof $.fn.magnificPopup !== 'undefined') {
+		  $('.gallery-img').magnificPopup({
+			type: 'image',
+			gallery: { enabled: true }
+		  });
+		}
+	  }
+	}
+
+	// Initialize gallery
+	fetchApprovedFiles().then(renderGallery);
+	</script>
+
+	<style>
+	@keyframes spin {
+	  0% { transform: rotate(0deg); }
+	  100% { transform: rotate(360deg); }
+	}
+	.icon-spinner {
+	  animation: spin 1s linear infinite !important;
+	  display: inline-block;
+	}
+	</style>
+
+	<script>
+	document.addEventListener('DOMContentLoaded', function() {
+	  var uploadForm = document.getElementById('guest-photo-upload-form');
+	  if (uploadForm) {
+		uploadForm.addEventListener('submit', function(e) {
+		  var loader = document.getElementById('upload-loader');
+		  if (loader) loader.style.display = 'block';
+		  // Hide loader after 3 seconds for demo (replace with real upload callback)
+		  setTimeout(function() {
+			if (loader) loader.style.display = 'none';
+		  }, 3000);
+		});
+	  }
+	});
+	</script>
+
 	</body>
 </html>
 

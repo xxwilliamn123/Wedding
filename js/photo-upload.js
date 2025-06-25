@@ -7,12 +7,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // File validation constants
     const MAX_FILES = 10;
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
     
     // Google Apps Script Web App URL
     // IMPORTANT: Use the /exec endpoint (not /dev) for production
-    const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBTNYQkrS_CldSPVTjVBLERrqzqYT2BbcL8I38MNmwUyziugTqLDFJKFPilZ7Mq2es/exec';
+    const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqhjk9xjME1X18aiBkVTDdW0NtDzLaR8s5BTrSZa5uWHtdpK5gK5e05w4HqhBFEgYv/exec';
     
     // Handle file selection and preview
     fileInput.addEventListener('change', function(e) {
@@ -32,8 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
         files.forEach(file => {
             if (!ALLOWED_TYPES.includes(file.type)) {
                 invalidFiles.push(`${file.name} - Invalid file type`);
-            } else if (file.size > MAX_FILE_SIZE) {
-                invalidFiles.push(`${file.name} - File too large (max 5MB)`);
             } else {
                 validFiles.push(file);
             }
@@ -122,80 +119,88 @@ document.addEventListener('DOMContentLoaded', function() {
         const guestEmail = formData.get('guest_email');
         const photoDescription = formData.get('photo_description');
         
-        const uploadedFiles = [];
+        console.log(`Preparing bulk upload of ${files.length} files`);
         
-        // Upload each file individually
+        // Prepare all files for bulk upload
+        const fileDataArray = [];
+        
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            
-            console.log('Uploading file:', file.name, 'Size:', file.size, 'Type:', file.type);
+            console.log('Processing file for bulk upload:', file.name, 'Size:', file.size, 'Type:', file.type);
             
             try {
                 // Convert file to base64
                 const base64Data = await fileToBase64(file);
                 
-                // Create URL-encoded form data for Google Apps Script
-                const uploadData = new URLSearchParams();
-                uploadData.append('fileName', file.name);
-                uploadData.append('guestName', guestName);
-                uploadData.append('guestEmail', guestEmail);
-                uploadData.append('description', photoDescription || '');
-                uploadData.append('fileData', base64Data);
-                uploadData.append('fileType', file.type);
-                
-                // Upload to Google Apps Script
-                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: uploadData.toString()
-                });
-                
-                console.log('Response status:', response.status);
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Response error:', errorText);
-                    throw new Error(`Upload failed for ${file.name}: ${response.status} ${response.statusText}`);
-                }
-                
-                const result = await response.json();
-                console.log('Upload result:', result);
-                
-                if (!result.success) {
-                    throw new Error(result.message || `Upload failed for ${file.name}`);
-                }
-                
-                // Store file information including Google Drive ID
-                uploadedFiles.push({
-                    original_name: file.name,
-                    file_size: file.size,
-                    file_type: file.type,
-                    google_drive_id: result.fileId || null,
-                    google_drive_url: result.fileUrl || null
+                fileDataArray.push({
+                    fileName: file.name,
+                    fileType: file.type,
+                    fileData: base64Data
                 });
                 
             } catch (error) {
-                console.error('Upload error for', file.name, ':', error);
-                throw new Error(`Failed to upload ${file.name}: ${error.message}`);
+                console.error('Error processing file for bulk upload:', file.name, error);
+                throw new Error(`Failed to process ${file.name}: ${error.message}`);
             }
         }
         
-        // Save submission metadata to localStorage
-        const submission = {
-            id: generateId(),
-            guest_name: guestName,
-            guest_email: guestEmail,
-            photo_description: photoDescription,
-            files: uploadedFiles,
-            submission_date: new Date().toISOString(),
-            status: 'pending'
-        };
+        console.log(`Sending bulk upload request with ${fileDataArray.length} files`);
         
-        // Note: Admin panel will fetch files directly from Google Drive
-        // No need to save to localStorage anymore
-        console.log('Photo uploaded successfully. Admin panel will fetch from Google Drive.');
+        try {
+            // Create URL-encoded form data for bulk upload
+            const uploadData = new URLSearchParams();
+            uploadData.append('guestName', guestName);
+            uploadData.append('guestEmail', guestEmail);
+            uploadData.append('description', photoDescription || '');
+            uploadData.append('fileDataArray', JSON.stringify(fileDataArray));
+            
+            // Upload all files in a single request
+            const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: uploadData.toString()
+            });
+            
+            console.log('Bulk upload response status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Bulk upload response error:', errorText);
+                throw new Error(`Bulk upload failed: ${response.status} ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            console.log('Bulk upload result:', result);
+            
+            if (!result.success) {
+                throw new Error(result.message || 'Bulk upload failed');
+            }
+            
+            console.log(`Bulk upload completed successfully. ${result.successfulUploads} files uploaded, ${result.failedUploads} failed.`);
+            
+            // Save submission metadata to localStorage
+            const submission = {
+                id: generateId(),
+                guest_name: guestName,
+                guest_email: guestEmail,
+                photo_description: photoDescription,
+                files: result.uploadedFiles || [],
+                failed_files: result.failedFiles || [],
+                submission_date: new Date().toISOString(),
+                status: 'pending',
+                total_files: result.totalFiles,
+                successful_uploads: result.successfulUploads,
+                failed_uploads: result.failedUploads
+            };
+            
+            console.log('Bulk photo upload completed successfully. Admin panel will fetch from Google Drive.');
+            
+        } catch (error) {
+            console.error('Bulk upload error:', error);
+            throw new Error(`Bulk upload failed: ${error.message}`);
+        }
     }
     
     // Convert file to base64
