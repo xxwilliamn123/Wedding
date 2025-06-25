@@ -154,6 +154,33 @@
             font-size: 14px;
             margin-top: 5px;
         }
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .loader i {
+            font-size: 48px;
+            color: #007bff;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loader p {
+            margin-top: 15px;
+            font-size: 16px;
+        }
+        /* Alternative spinner styles */
+        .loader-spinner2 i {
+            animation: spin 0.8s linear infinite;
+        }
+        .loader-spinner3 i {
+            animation: spin 1.2s linear infinite;
+        }
     </style>
 </head>
 <body>
@@ -203,10 +230,18 @@
             <button id="clear-data-btn" class="btn btn-warning" style="margin-left: 10px;">
                 <i class="icon-refresh"></i> Refresh from Drive
             </button>
+            
+            <button id="test-loader-btn" class="btn btn-info" style="margin-left: 10px;">
+                <i class="icon-play"></i> Test Loader
+            </button>
         </div>
         
         <!-- Submissions Container -->
         <div id="submissions-container">
+            <div id="loader" class="loader">
+                <i class="icon-spinner"></i>
+                <p>Loading photo submissions from Google Drive...</p>
+            </div>
             <div class="no-submissions">
                 <i class="icon-camera" style="font-size: 48px; color: #ddd; margin-bottom: 15px;"></i>
                 <p>No photo submissions found.</p>
@@ -238,21 +273,28 @@
                 document.getElementById('guest-filter').addEventListener('change', () => this.filterSubmissions());
                 document.getElementById('refresh-btn').addEventListener('click', () => this.loadSubmissions());
                 document.getElementById('clear-data-btn').addEventListener('click', () => this.clearAllData());
+                document.getElementById('test-loader-btn').addEventListener('click', () => this.testLoader());
             }
             
             async loadSubmissions() {
+                // Show loader
+                this.showLoader();
+                
                 // Only fetch files from Google Drive, no localStorage
                 await this.fetchGoogleDriveFiles();
                 
                 this.updateGuestFilter();
                 this.filterSubmissions();
                 this.updateStats();
+                
+                // Hide loader
+                this.hideLoader();
             }
             
             async fetchGoogleDriveFiles() {
                 try {
                     // Google Apps Script URL for fetching files
-                    const FETCH_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5-QuLe3KUDvz0vICpWPsMrFM_1y_UQhU_T8uNjZSEtgyrdhttps://script.google.com/macros/s/AKfycbzqhjk9xjME1X18aiBkVTDdW0NtDzLaR8s5BTrSZa5uWHtdpK5gK5e05w4HqhBFEgYv/exec';
+                    const FETCH_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqhjk9xjME1X18aiBkVTDdW0NtDzLaR8s5BTrSZa5uWHtdpK5gK5e05w4HqhBFEgYv/exec';
                     
                     const fetchData = new URLSearchParams();
                     fetchData.append('action', 'listFiles');
@@ -360,6 +402,10 @@
             
             renderSubmissions() {
                 const container = document.getElementById('submissions-container');
+                const loader = document.getElementById('loader');
+                
+                // Hide loader when rendering results
+                if (loader) loader.style.display = 'none';
                 
                 if (this.filteredSubmissions.length === 0) {
                     container.innerHTML = `
@@ -563,6 +609,26 @@
                     this.loadSubmissions();
                     this.showMessage('Data refreshed from Google Drive!', 'success');
                 }
+            }
+            
+            showLoader() {
+                const loader = document.getElementById('loader');
+                const noSubmissions = document.querySelector('.no-submissions');
+                if (loader) loader.style.display = 'block';
+                if (noSubmissions) noSubmissions.style.display = 'none';
+            }
+            
+            hideLoader() {
+                const loader = document.getElementById('loader');
+                if (loader) loader.style.display = 'none';
+            }
+            
+            testLoader() {
+                this.showLoader();
+                setTimeout(() => {
+                    this.hideLoader();
+                    this.showMessage('Loader test completed!', 'success');
+                }, 3000);
             }
         }
         
