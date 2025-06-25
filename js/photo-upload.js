@@ -122,6 +122,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const guestEmail = formData.get('guest_email');
         const photoDescription = formData.get('photo_description');
         
+        const uploadedFiles = [];
+        
         // Upload each file individually
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
@@ -165,6 +167,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     throw new Error(result.message || `Upload failed for ${file.name}`);
                 }
                 
+                // Store file information including Google Drive ID
+                uploadedFiles.push({
+                    original_name: file.name,
+                    file_size: file.size,
+                    file_type: file.type,
+                    google_drive_id: result.fileId || null,
+                    google_drive_url: result.fileUrl || null
+                });
+                
             } catch (error) {
                 console.error('Upload error for', file.name, ':', error);
                 throw new Error(`Failed to upload ${file.name}: ${error.message}`);
@@ -177,11 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
             guest_name: guestName,
             guest_email: guestEmail,
             photo_description: photoDescription,
-            files: files.map(file => ({
-                original_name: file.name,
-                file_size: file.size,
-                file_type: file.type
-            })),
+            files: uploadedFiles,
             submission_date: new Date().toISOString(),
             status: 'pending'
         };

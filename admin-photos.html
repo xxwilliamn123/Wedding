@@ -315,13 +315,20 @@
                         <div class="photo-grid">
                             ${submission.files.map(file => `
                                 <div class="photo-item">
-                                    <div style="background: #f8f9fa; height: 150px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="icon-image" style="font-size: 48px; color: #ddd;"></i>
-                                    </div>
+                                    ${file.google_drive_url ? `
+                                        <img src="${file.google_drive_url}" alt="${file.original_name}" 
+                                             style="width: 100%; height: 150px; object-fit: cover;"
+                                             onerror="this.parentElement.innerHTML='<div style=\\'background: #f8f9fa; height: 150px; display: flex; align-items: center; justify-content: center;\\'><i class=\\'icon-image\\' style=\\'font-size: 48px; color: #ddd;\\'></i></div>'">
+                                    ` : `
+                                        <div style="background: #f8f9fa; height: 150px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="icon-image" style="font-size: 48px; color: #ddd;"></i>
+                                        </div>
+                                    `}
                                     <div class="photo-info">
                                         <div><strong>${file.original_name}</strong></div>
                                         <div>${this.formatFileSize(file.file_size)}</div>
                                         <div>${file.file_type}</div>
+                                        ${file.google_drive_id ? `<div style="font-size: 10px; color: #999;">ID: ${file.google_drive_id}</div>` : ''}
                                     </div>
                                 </div>
                             `).join('')}
@@ -350,15 +357,61 @@
             }
             
             approveSubmission(submissionId) {
-                if (confirm('Are you sure you want to approve this submission?')) {
+                if (confirm('Are you sure you want to approve this submission? This will rename the files with "APPROVED_" prefix.')) {
                     this.updateSubmissionStatus(submissionId, 'approved');
+                    this.renameFiles(submissionId, 'APPROVED_');
                 }
             }
             
             rejectSubmission(submissionId) {
-                if (confirm('Are you sure you want to reject this submission?')) {
+                if (confirm('Are you sure you want to reject this submission? This will rename the files with "REJECTED_" prefix.')) {
                     this.updateSubmissionStatus(submissionId, 'rejected');
+                    this.renameFiles(submissionId, 'REJECTED_');
                 }
+            }
+            
+            async renameFiles(submissionId, prefix) {
+                const submission = this.submissions.find(s => s.id === submissionId);
+                if (!submission) return;
+                
+                // Google Apps Script URL for renaming files
+                const RENAME_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwYEwuNFzjtEXqyFbHKdTvCrUReTjascRlImmZ87Y2NGph9AZTXhrMQDdqkAkbiHq1z/exec';
+                
+                for (const file of submission.files) {
+                    if (file.google_drive_id) {
+                        try {
+                            const renameData = new URLSearchParams();
+                            renameData.append('action', 'rename');
+                            renameData.append('fileId', file.google_drive_id);
+                            renameData.append('newName', prefix + file.original_name);
+                            
+                            const response = await fetch(RENAME_SCRIPT_URL, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                body: renameData.toString()
+                            });
+                            
+                            if (response.ok) {
+                                const result = await response.json();
+                                if (result.success) {
+                                    // Update the file name in our local storage
+                                    file.original_name = prefix + file.original_name;
+                                    console.log(`File renamed successfully: ${file.original_name}`);
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error renaming file:', error);
+                        }
+                    }
+                }
+                
+                // Save updated submission back to localStorage
+                localStorage.setItem('photo_submissions', JSON.stringify(this.submissions));
+                
+                // Refresh display
+                this.loadSubmissions();
             }
             
             updateSubmissionStatus(submissionId, status) {
