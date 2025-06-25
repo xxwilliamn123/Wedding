@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple CORS Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .result { margin: 20px 0; padding: 15px; border-radius: 8px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Simple CORS Test</h1>
+    
+    <div class="info result">
+        <h3>Test URL</h3>
+        <input type="text" id="test-url" value="https://script.google.com/macros/s/AKfycbwNsw9tA3n1WVPzuf_f1khc7330ZpV4WS3TFbhTTrw/exec" style="width: 100%; padding: 10px; margin: 10px 0;">
+    </div>
+    
+    <div>
+        <button onclick="testUrl()">Test URL Directly</button>
+        <button onclick="testFetch()">Test with Fetch</button>
+        <button onclick="testXHR()">Test with XMLHttpRequest</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        function showResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+        
+        function getTestUrl() {
+            return document.getElementById('test-url').value;
+        }
+        
+        function testUrl() {
+            const url = getTestUrl();
+            showResult(`Opening URL in new tab: ${url}`, 'info');
+            window.open(url, '_blank');
+        }
+        
+        async function testFetch() {
+            try {
+                showResult('Testing with fetch...', 'info');
+                const response = await fetch(getTestUrl());
+                const text = await response.text();
+                showResult(`Fetch Success: ${text}`, 'success');
+            } catch (error) {
+                showResult(`Fetch Error: ${error.message}`, 'error');
+                console.error('Fetch error details:', error);
+            }
+        }
+        
+        function testXHR() {
+            try {
+                showResult('Testing with XMLHttpRequest...', 'info');
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', getTestUrl(), true);
+                
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        showResult(`XHR Success: ${xhr.responseText}`, 'success');
+                    } else {
+                        showResult(`XHR Error: ${xhr.status} ${xhr.statusText}`, 'error');
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    showResult('XHR Network Error', 'error');
+                };
+                
+                xhr.send();
+            } catch (error) {
+                showResult(`XHR Error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html> 
