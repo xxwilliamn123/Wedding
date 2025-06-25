@@ -1,4 +1,4 @@
-// Guest Photo Upload Handler - Google Drive Integration
+// Guest Photo Upload Handler - Google Apps Script Integration
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('guest-photo-upload-form');
     const fileInput = document.getElementById('photo-upload');
@@ -10,13 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
     
-    // Google Drive API configuration
-    const GOOGLE_DRIVE_FOLDER_ID = '12_cbg4e4_yR7BuScccf7StKtWGYp_-Uj';
-    const CLIENT_ID = '827239835191-a9253av5isgv64lf7hirc41cn5b8odl2.apps.googleusercontent.com';
-    const API_KEY = 'AIzaSyCK8nThAdDVVlGSjdyRzkJHd6-7SJdHaDw';
-    
-    // Initialize Google Drive API
-    initializeGoogleDrive();
+    // Google Apps Script Web App URL
+    // IMPORTANT: Use the /exec endpoint (not /dev) for production
+    const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwNsw9tA3n1WVPzuf_f1khc7330ZpV4WS3TFbhTTrw/exec';
     
     // Handle file selection and preview
     fileInput.addEventListener('change', function(e) {
@@ -98,13 +94,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const originalText = submitBtn.innerHTML;
         
         // Show loading state
-        submitBtn.innerHTML = '<i class="icon-spinner" style="margin-right: 8px;"></i>Uploading to Google Drive...';
+        submitBtn.innerHTML = '<i class="icon-spinner" style="margin-right: 8px;"></i>Uploading Photos...';
         submitBtn.disabled = true;
         
-        // Upload to Google Drive
-        uploadToGoogleDrive(formData)
+        // Upload to Google Apps Script
+        uploadToGoogleAppsScript(formData)
             .then(() => {
-                showSuccessMessage('Photos uploaded successfully to Google Drive! They will be reviewed and approved within 24-48 hours.');
+                showSuccessMessage('Photos uploaded successfully! You will receive an email confirmation shortly.');
                 form.reset();
                 hidePreview();
             })
@@ -119,102 +115,91 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     });
     
-    // Initialize Google Drive API
-    function initializeGoogleDrive() {
-        // Load Google Drive API
-        const script = document.createElement('script');
-        script.src = 'https://apis.google.com/js/api.js';
-        script.onload = function() {
-            gapi.load('client:auth2', initClient);
-        };
-        document.head.appendChild(script);
-    }
-    
-    // Initialize Google Drive client
-    function initClient() {
-        gapi.client.init({
-            apiKey: API_KEY,
-            clientId: CLIENT_ID,
-            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-            scope: 'https://www.googleapis.com/auth/drive.file'
-        }).then(function() {
-            console.log('Google Drive API initialized');
-        }).catch(function(error) {
-            console.error('Error initializing Google Drive API:', error);
-        });
-    }
-    
-    // Upload files to Google Drive
-    async function uploadToGoogleDrive(formData) {
+    // Upload to Google Apps Script
+    async function uploadToGoogleAppsScript(formData) {
         const files = formData.getAll('photos[]');
         const guestName = formData.get('guest_name');
         const guestEmail = formData.get('guest_email');
         const photoDescription = formData.get('photo_description');
         
-        // Authenticate with Google Drive
-        const authInstance = gapi.auth2.getAuthInstance();
-        if (!authInstance.isSignedIn.get()) {
-            await authInstance.signIn();
+        // Upload each file individually
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            
+            console.log('Uploading file:', file.name, 'Size:', file.size, 'Type:', file.type);
+            
+            try {
+                // Convert file to base64
+                const base64Data = await fileToBase64(file);
+                
+                // Create URL-encoded form data for Google Apps Script
+                const uploadData = new URLSearchParams();
+                uploadData.append('fileName', file.name);
+                uploadData.append('guestName', guestName);
+                uploadData.append('guestEmail', guestEmail);
+                uploadData.append('description', photoDescription || '');
+                uploadData.append('fileData', base64Data);
+                uploadData.append('fileType', file.type);
+                
+                // Upload to Google Apps Script
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: uploadData.toString()
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Response error:', errorText);
+                    throw new Error(`Upload failed for ${file.name}: ${response.status} ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('Upload result:', result);
+                
+                if (!result.success) {
+                    throw new Error(result.message || `Upload failed for ${file.name}`);
+                }
+                
+            } catch (error) {
+                console.error('Upload error for', file.name, ':', error);
+                throw new Error(`Failed to upload ${file.name}: ${error.message}`);
+            }
         }
         
+        // Save submission metadata to localStorage
         const submission = {
             id: generateId(),
             guest_name: guestName,
             guest_email: guestEmail,
             photo_description: photoDescription,
-            files: [],
+            files: files.map(file => ({
+                original_name: file.name,
+                file_size: file.size,
+                file_type: file.type
+            })),
             submission_date: new Date().toISOString(),
-            status: 'pending',
-            approved_by: null,
-            approved_date: null
+            status: 'pending'
         };
         
-        // Upload each file to Google Drive
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const driveFile = await uploadFileToDrive(file, guestName);
-            
-            submission.files.push({
-                original_name: file.name,
-                drive_file_id: driveFile.id,
-                drive_file_name: driveFile.name,
-                file_size: file.size,
-                file_type: file.type,
-                drive_web_view_link: driveFile.webViewLink
-            });
-        }
-        
-        // Save submission metadata to localStorage (or you can use a database)
         saveSubmission(submission);
-        
-        // Send notification
-        sendNotification(submission);
     }
     
-    // Upload single file to Google Drive
-    function uploadFileToDrive(file, guestName) {
-        const metadata = {
-            name: `${guestName}_${Date.now()}_${file.name}`,
-            parents: [GOOGLE_DRIVE_FOLDER_ID],
-            mimeType: file.type
-        };
-        
-        const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
-        form.append('file', file);
-        
-        return gapi.client.request({
-            path: 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
-            method: 'POST',
-            params: {
-                uploadType: 'multipart'
-            },
-            headers: {
-                'Authorization': 'Bearer ' + gapi.auth.getToken().access_token
-            },
-            body: form
-        }).then(function(response) {
-            return response.result;
+    // Convert file to base64
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
+                const base64 = reader.result.split(',')[1];
+                resolve(base64);
+            };
+            reader.onerror = error => reject(error);
         });
     }
     
@@ -228,22 +213,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const submissions = JSON.parse(localStorage.getItem('photo_submissions') || '[]');
         submissions.push(submission);
         localStorage.setItem('photo_submissions', JSON.stringify(submissions));
-    }
-    
-    // Send notification (EmailJS integration)
-    function sendNotification(submission) {
-        // EmailJS integration for notifications
-        if (typeof emailjs !== 'undefined') {
-            emailjs.send('your_service_id', 'your_template_id', {
-                guest_name: submission.guest_name,
-                guest_email: submission.guest_email,
-                photo_count: submission.files.length,
-                submission_date: submission.submission_date,
-                drive_folder_link: `https://drive.google.com/drive/folders/${GOOGLE_DRIVE_FOLDER_ID}`
-            });
-        }
-        
-        console.log('New photo submission to Google Drive:', submission);
     }
     
     // Show success message
