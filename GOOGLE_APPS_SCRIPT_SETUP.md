@@ -51,6 +51,12 @@ function doPost(e) {
       return handleRename(params);
     }
     
+    // Check if this is a listFiles action
+    if (params.action === 'listFiles') {
+      console.log('Handling listFiles action...');
+      return handleListFiles(params);
+    }
+    
     // Handle file upload
     console.log('Handling file upload...');
     return handleUpload(params);
@@ -242,6 +248,56 @@ function handleRename(params) {
       
   } catch (error) {
     console.error('Rename error:', error);
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: false,
+        message: error.toString()
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function handleListFiles(params) {
+  const folderId = params.folderId || '1TbeQiFUrkyv7Y-bfwFspPdTkRNY-INXV';
+  
+  console.log('ListFiles request for folder:', folderId);
+  
+  try {
+    // Get the folder
+    const folder = DriveApp.getFolderById(folderId);
+    console.log('Found folder:', folder.getName());
+    
+    // Get all files in the folder
+    const files = folder.getFiles();
+    const fileList = [];
+    
+    while (files.hasNext()) {
+      const file = files.next();
+      const fileInfo = {
+        id: file.getId(),
+        name: file.getName(),
+        size: file.getSize(),
+        mimeType: file.getMimeType(),
+        description: file.getDescription(),
+        createdTime: file.getDateCreated().toISOString(),
+        webContentLink: file.getDownloadUrl(),
+        webViewLink: `https://drive.google.com/file/d/${file.getId()}/view`
+      };
+      fileList.push(fileInfo);
+    }
+    
+    console.log(`Found ${fileList.length} files in folder`);
+    
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: true,
+        message: `Found ${fileList.length} files`,
+        files: fileList
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    console.error('ListFiles error:', error);
     return ContentService
       .createTextOutput(JSON.stringify({
         success: false,

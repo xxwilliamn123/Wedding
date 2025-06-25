@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Panel</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Test Admin Panel Setup</h1>
+    
+    <div class="test-section info">
+        <h3>Add Test Submission to Admin Panel</h3>
+        <p>This will create a test submission in localStorage so you can see how the admin panel works.</p>
+        <button onclick="addTestSubmission()">Add Test Submission</button>
+        <button onclick="clearAllSubmissions()">Clear All Submissions</button>
+        <button onclick="viewSubmissions()">View Current Submissions</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Real Upload</h3>
+        <p>Upload a real photo through your website to test the full functionality.</p>
+        <a href="gallery.html" target="_blank" style="padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;">Go to Gallery Page</a>
+    </div>
+    
+    <div class="test-section">
+        <h3>Open Admin Panel</h3>
+        <p>Open the admin panel to see the submissions.</p>
+        <a href="admin-photos.html" target="_blank" style="padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;">Open Admin Panel</a>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        function showResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+        
+        function addTestSubmission() {
+            // Create a test submission using the file data from your successful upload
+            const testSubmission = {
+                id: generateId(),
+                guest_name: 'Test Guest',
+                guest_email: 'test@example.com',
+                photo_description: 'This is a test photo submission',
+                files: [
+                    {
+                        original_name: 'test.jpg',
+                        file_size: 1024000, // 1MB
+                        file_type: 'image/jpeg',
+                        google_drive_id: '1jBdvjgErOMjmUt_4P5nXRBAju0ZU6JlG',
+                        google_drive_url: 'https://drive.google.com/uc?id=1jBdvjgErOMjmUt_4P5nXRBAju0ZU6JlG&export=download'
+                    }
+                ],
+                submission_date: new Date().toISOString(),
+                status: 'pending'
+            };
+            
+            // Get existing submissions
+            const submissions = JSON.parse(localStorage.getItem('photo_submissions') || '[]');
+            
+            // Add the test submission
+            submissions.push(testSubmission);
+            
+            // Save back to localStorage
+            localStorage.setItem('photo_submissions', JSON.stringify(submissions));
+            
+            showResult(`Test submission added! ID: ${testSubmission.id}`, 'success');
+            showResult(`Total submissions: ${submissions.length}`, 'info');
+        }
+        
+        function clearAllSubmissions() {
+            localStorage.removeItem('photo_submissions');
+            showResult('All submissions cleared!', 'success');
+        }
+        
+        function viewSubmissions() {
+            const submissions = JSON.parse(localStorage.getItem('photo_submissions') || '[]');
+            showResult(`Found ${submissions.length} submissions:`, 'info');
+            
+            submissions.forEach((submission, index) => {
+                showResult(`Submission ${index + 1}: ${submission.guest_name} - ${submission.status}`, 'info');
+            });
+        }
+        
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+        
+        // Show current submissions on page load
+        window.onload = function() {
+            viewSubmissions();
+        };
+    </script>
+</body>
+</html> 

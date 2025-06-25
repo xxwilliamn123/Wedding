@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Google Apps Script Web App URL
     // IMPORTANT: Use the /exec endpoint (not /dev) for production
-    const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwINU8aN3UW0-ieqzZB1i41h0O0PSdigNPcvAuxxQx7-gaaZsufRuFZlaWFggn4P3BN/exec';
+    const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBTNYQkrS_CldSPVTjVBLERrqzqYT2BbcL8I38MNmwUyziugTqLDFJKFPilZ7Mq2es/exec';
     
     // Handle file selection and preview
     fileInput.addEventListener('change', function(e) {

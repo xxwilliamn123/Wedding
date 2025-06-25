@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test List Files from Google Drive</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        #results { margin-top: 20px; }
+        .file-item { margin: 10px 0; padding: 10px; border: 1px solid #eee; border-radius: 4px; }
+        .file-image { max-width: 200px; max-height: 150px; object-fit: cover; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Test List Files from Google Drive</h1>
+    
+    <div class="test-section info">
+        <h3>Fetch Files from Google Drive</h3>
+        <p>This will fetch all files from your Google Drive folder and display them.</p>
+        <button onclick="fetchFiles()">Fetch Files from Google Drive</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Open Admin Panel</h3>
+        <p>Open the admin panel to see how it displays the files.</p>
+        <a href="admin-photos.html" target="_blank" style="padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;">Open Admin Panel</a>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        function showResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function fetchFiles() {
+            try {
+                showResult('Fetching files from Google Drive...', 'info');
+                
+                const fetchData = new URLSearchParams();
+                fetchData.append('action', 'listFiles');
+                fetchData.append('folderId', '1TbeQiFUrkyv7Y-bfwFspPdTkRNY-INXV');
+                
+                const response = await fetch('https://script.google.com/macros/s/AKfycbwINU8aN3UW0-ieqzZB1i41h0O0PSdigNPcvAuxxQx7-gaaZsufRuFZlaWFggn4P3BN/exec', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: fetchData.toString()
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    showResult(`Error: ${response.status} ${response.statusText}`, 'error');
+                    return;
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult(`Success! Found ${result.files.length} files`, 'success');
+                    displayFiles(result.files);
+                } else {
+                    showResult(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                showResult(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        function displayFiles(files) {
+            const results = document.getElementById('results');
+            
+            if (files.length === 0) {
+                showResult('No files found in the folder.', 'info');
+                return;
+            }
+            
+            files.forEach((file, index) => {
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'file-item';
+                
+                const isImage = file.mimeType && file.mimeType.startsWith('image/');
+                const imageHtml = isImage ? `<img src="${file.webContentLink}" alt="${file.name}" class="file-image" onerror="this.style.display='none'">` : '';
+                
+                fileDiv.innerHTML = `
+                    <h4>File ${index + 1}: ${file.name}</h4>
+                    ${imageHtml}
+                    <p><strong>ID:</strong> ${file.id}</p>
+                    <p><strong>Size:</strong> ${formatFileSize(file.size)}</p>
+                    <p><strong>Type:</strong> ${file.mimeType}</p>
+                    <p><strong>Created:</strong> ${new Date(file.createdTime).toLocaleString()}</p>
+                    <p><strong>Download:</strong> <a href="${file.webContentLink}" target="_blank">Download File</a></p>
+                    <p><strong>View:</strong> <a href="${file.webViewLink}" target="_blank">View in Drive</a></p>
+                `;
+                
+                results.appendChild(fileDiv);
+            });
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html> 
