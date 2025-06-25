@@ -258,7 +258,6 @@
 	  fetchData.append('action', 'listFiles');
 	  fetchData.append('folderId', '1TbeQiFUrkyv7Y-bfwFspPdTkRNY-INXV');
 
-	  try {
 	  const response = await fetch(FETCH_SCRIPT_URL, {
 		method: 'POST',
 		headers: {
@@ -268,52 +267,13 @@
 	  });
 
 	  const result = await response.json();
-		
-		if (result.success) {
 	  // Only return approved files
-		  const approvedFiles = result.files.filter(file => file.name.startsWith('APPROVED_'));
-		  return approvedFiles;
-		} else {
-		  console.error('Failed to fetch files:', result.message);
-		  return [];
-		}
-	  } catch (error) {
-		console.error('Error fetching files:', error);
-		return [];
-	  }
+	  return result.files.filter(file => file.name.startsWith('APPROVED_'));
 	}
 
 	function renderGallery(files) {
 	  const loader = document.getElementById('gallery-loader');
 	  if (loader) loader.style.display = 'none';
-	  
-	  const galleryRow = document.querySelector('#fh5co-gallery .container .row:last-of-type');
-	  
-	  if (!files || files.length === 0) {
-		// Show "no images" message
-		if (galleryRow) {
-		  galleryRow.innerHTML = `
-			<div class="col-md-12 text-center">
-			  <div class="no-images-message" style="padding: 60px 20px; background: #f8f9fa; border-radius: 15px; margin: 20px 0;">
-				<i class="icon-image" style="font-size: 64px; color: #ccc; margin-bottom: 20px; display: block;"></i>
-				<h3 style="color: #6b7280; margin-bottom: 15px;">No Images Uploaded Yet</h3>
-				<p style="color: #9ca3af; font-size: 16px; line-height: 1.6;">
-				  Be the first to share your wedding memories!<br>
-				  Upload your photos using the form above.
-				</p>
-				<div style="margin-top: 30px;">
-				  <a href="#fh5co-guest-upload" class="btn btn-primary" style="background: #1e40af; border: none; padding: 12px 25px; font-size: 14px;">
-					<i class="icon-upload" style="margin-right: 8px;"></i>Upload Photos
-				  </a>
-				</div>
-			  </div>
-			</div>
-		  `;
-		}
-		return;
-	  }
-	  
-	  // Render gallery with images
 	  const columns = [[], [], []];
 	  files.forEach((file, idx) => {
 		const fullUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`;
@@ -327,7 +287,7 @@
 		`;
 		columns[idx % 3].push(imgHtml);
 	  });
-	  
+	  const galleryRow = document.querySelector('#fh5co-gallery .container .row:last-of-type');
 	  if (galleryRow) {
 		galleryRow.innerHTML = `
 		  <div class="col-md-4">${columns[0].join('')}</div>
@@ -344,7 +304,6 @@
 	  }
 	}
 
-	// Initialize gallery
 	fetchApprovedFiles().then(renderGallery);
 	</script>
 
