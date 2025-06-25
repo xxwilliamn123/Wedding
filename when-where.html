@@ -100,9 +100,7 @@
 								<a href="groom-bride.html">Groom &amp; Bride</a>
 							</li>
 							<li class="active"><a href="when-where.html">When &amp; Where</a></li>
-							<li><a href="guest.html">Guest</a></li>
 							<li><a href="gallery.html">Gallery</a></li>
-							<li><a href="blog.html">Blog</a></li>
 						</ul>
 					</nav>
 				</div>
@@ -120,30 +118,41 @@
 					</div>
 				</div>
 				<div class="row row-bottom-padded-md">
-					<div class="col-md-6 text-center animate-box">
-						<div class="wedding-events">
-							<div class="ceremony-bg" style="background-image: url(images/wed-ceremony.jpg);"></div>
-							<div class="desc">
-								<h3>Wedding Ceremony</h3>
-								<p><strong>Saturday, December 28, 2017, 4.00 PM - 5.00PM @ Boracay Beach</strong></p>
-								<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean.</p>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-6 text-center animate-box">
+					<div class="col-md-8 col-md-offset-2 text-center animate-box">
 						<div class="wedding-events">
 							<div class="ceremony-bg" style="background-image: url(images/wed-party.jpg);"></div>
 							<div class="desc">
 								<h3>Wedding Party</h3>
-								<p><strong>Saturday, December 28, 2017, 6.00 PM - 11.00PM @ Boracay Beach</strong></p>
-								<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean.</p>
+								<p><strong>Saturday, October 18, 2025, 1:00 PM - 6:00 PM @ Bethel Guest House</strong></p>
+								<p>Join us for a beautiful celebration of love and commitment. We're excited to share this special day with our family and friends at the elegant Bethel Guest House in Dumaguete City.</p>
+								<p style="margin-top: 15px;">
 							</div>
 						</div>
 					</div>
 				</div>
+
+		<!-- Map Section -->
+		<div id="fh5co-map-section" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e40af 100%); padding: 80px 0; border-top: 3px solid #fbbf24; border-bottom: 3px solid #fbbf24;">
+			<div class="container">
 				<div class="row">
-					<div class="col-md-12">
-						<div id="map" class="fh5co-map"></div>
+					<div class="col-md-8 col-md-offset-2 text-center animate-box">
+						<h2 style="color: #fff; font-family: 'Montez', cursive; font-size: 2.5em; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Find Our Venue</h2>
+						<div style="border: 2px solid #fbbf24; width: 150px; margin: 0 auto 40px;"></div>
+						<p style="color: #e2e8f0; font-size: 18px; line-height: 1.6; margin-bottom: 40px;">
+							Get directions to our wedding venue at Bethel Guest House in Dumaguete. Click on the map marker for more details and directions.
+						</p>
+					</div>
+				</div>
+				<div class="row" style="margin-top: 30px;">
+					<div class="col-md-8 col-md-offset-2 text-center">
+						<div style="background: rgba(255,255,255,0.95); padding: 20px; border-radius: 10px; border-left: 4px solid #fbbf24; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+							<h4 style="color: #1e3a8a; margin-bottom: 10px;">Venue Information</h4>
+							<p style="color: #6b7280; margin: 0;"><strong>Bethel Guest House</strong> - Dumaguete City, Philippines</p>
+							<p style="color: #6b7280; margin: 5px 0;">Date: October 18, 2025 | Time: 1:00 PM - 6:00 PM</p>
+							<a href="https://maps.app.goo.gl/P5mEVBS5BVXTWC5G6" target="_blank" style="background: #1e40af; color: #fff; padding: 8px 16px; text-decoration: none; border-radius: 20px; display: inline-block; margin-top: 10px; font-size: 14px; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);">
+								<i class="icon-location" style="margin-right: 5px;"></i>Get Directions
+							</a>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -244,7 +253,9 @@
 	<!-- END fh5co-wrapper -->
 
 	<!-- Google Map -->
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCefOgb1ZWqYtj7raVSmN4PL2WkTrc-KyA&sensor=false"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCefOgb1ZWqYtj7raVSmN4PL2WkTrc-KyA&callback=initMap" async defer></script>
+	<!-- Google Map Handler -->
+	<script src="js/google_map.js"></script>
 	<!-- jQuery -->
 	<script src="dist/scripts.min.js"></script>
 	<!-- EmailJS -->
