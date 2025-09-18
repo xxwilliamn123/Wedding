@@ -148,14 +148,14 @@ figure {
 .fh5co-cover,
 .fh5co-hero {
   position: relative;
-  height: 800px;
+  height: 600px;
   width: 100%;
 }
 
 @media screen and (max-width: 768px) {
   .fh5co-cover,
   .fh5co-hero {
-    height: 700px;
+    height: 500px;
   }
 }
 
@@ -184,7 +184,7 @@ figure {
 
 .fh5co-cover .display-t {
   display: table;
-  height: 800px;
+  height: 600px;
   width: 100%;
   position: relative;
   z-index: 2;
@@ -192,7 +192,7 @@ figure {
 
 @media screen and (max-width: 768px) {
   .fh5co-cover .display-t {
-    height: 600px;
+    height: 500px;
   }
 }
 
@@ -360,7 +360,7 @@ figure {
   position: relative;
   z-index: 2;
   font-size: 30px;
-  margin-top: 35px;
+  margin-top: 20px;
   font-weight: 700;
   float: left;
 }
@@ -390,7 +390,7 @@ figure {
   z-index: 2;
   display: block;
   float: right;
-  margin-top: 15px;
+  margin-top: 10px;
 }
 
 #fh5co-menu-wrap .sf-menu a {
@@ -1190,7 +1190,7 @@ figure {
   .fh5co-nav-toggle {
     display: block;
     top: 0px;
-    margin-top: 2em;
+    margin-top: 1.5em;
   }
 }
 
